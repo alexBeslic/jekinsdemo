@@ -6,6 +6,7 @@ pipeline{
    parameters {
   string defaultValue: '"pipeline"', name: 'GIT_BRANCH'
   booleanParam defaultValue: true, name: 'RUN_TEST'
+  booleanParam defaultValue: true, name: 'SEND_MAIL'
 }
     
     stages {
@@ -50,6 +51,9 @@ pipeline{
             }
         }
         stage("test"){
+             when {
+                equals(actual: params.RUN_TEST, expected: true)
+            }
             steps{
                 
                 script{
@@ -94,9 +98,18 @@ pipeline{
     post {
         success{
              script{
-                 someFunction("ime", env.BUILD_ID, "Ja",env.output)
+                 someFunction("ime", env.BUILD_ID, "Ja", env.output)
+                 
+                if(params.SEND_MAIL){
+                     mail to: 'beslic.alex@gmail.com',
+                     from: 'levonkeleman@levonkeleman.com', 
+                     subject: 'Jenkins',
+                     body: "Radi! ${env.BUILD_ID} ${env.output}"
+                     
+
+                }
              }
-        }
+                   }
         failure{
             echo "email: ${env.BUILD_ID} ${env.output}"
         }
